@@ -25,7 +25,7 @@ class User extends Component {
     }
   }
 
-  sendFormData() {
+  sendFormData(callback) {
 
     var str = JSON.stringify({
       "name": this.state.name,
@@ -34,8 +34,6 @@ class User extends Component {
         "value": this.state.money
       }
     });
-
-    console.log(str);
 
     var options = {
       headers: {
@@ -54,18 +52,25 @@ class User extends Component {
 
     var request = new Request('http://localhost:8080/user', options);
 
-    fetch(request).then(function (response) {
-    });
+    fetch(request).then(function (results) {
+      return results.json();
+    }).then(data => callback(data));
   }
 
   handleSubmit(event) {
-    this.setState({ type: 'info', message: 'Sending...' }, this.sendFormData);
+    this.setState({ type: 'info', message: 'Sending...' }, this.sendFormData((data) => {
+      if (data.status_code === 200) {
+        window.alert("Success");
+        this.myFormRef.reset();
+      } else window.alert("Fail")
+    })
+    );
     event.preventDefault();
   }
 
   render() {
     return (
-      <form onSubmit={this.handleSubmit}>
+      <form ref={(el) => this.myFormRef = el} onSubmit={this.handleSubmit}>
         <div className="User">
           <h1>Register</h1>
           <div className="User-form">
